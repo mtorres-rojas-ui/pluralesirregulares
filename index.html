@@ -3,480 +3,763 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plurales Irregulares — Juego Completo</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<title>Plurales Irregulares 🌟</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{
-  --purple:#7C5CBF;--purple-l:#EDE8F9;--purple-d:#3C3489;
-  --teal:#1B9E75;--teal-l:#DCF5EC;--teal-d:#085041;
-  --coral:#E05A2B;--coral-l:#FCEAE3;--coral-d:#712B13;
-  --amber:#D4860F;--amber-l:#FEF3DC;--amber-d:#633806;
-  --red:#E24B4A;--red-l:#FCEBEB;--red-d:#791F1F;
-  --blue-l:#E6F1FB;--blue-d:#0C447C;
-  --bg:#F7F4FF;--card:#fff;--border:#DDD6F5;--text:#1E1640;--muted:#7B70A3;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;user-select:none;-webkit-user-select:none;}
+  :root {
+    --bg: #fef9f0;
+    --yellow: #ffd93d;
+    --orange: #ff6b35;
+    --green: #06d6a0;
+    --red: #ef476f;
+    --blue: #118ab2;
+    --purple: #9b5de5;
+    --dark: #1a1a2e;
+    --card: #ffffff;
+    --muted: #8891a5;
+    --radius: 20px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-header{background:var(--purple);padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-.gtitle{font-family:'Fredoka One',cursive;font-size:1.75rem;color:#fff;}
-.hright{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.hbadge{background:rgba(255,255,255,.2);color:#fff;font-size:.9rem;font-weight:700;padding:5px 14px;border-radius:20px;}
-.hscore{background:var(--amber);color:#fff;font-family:'Fredoka One',cursive;font-size:1rem;padding:5px 14px;border-radius:20px;}
+  /* ── Confetti canvas ── */
+  #confetti-canvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 999;
+  }
 
-.phase-bar{display:flex;justify-content:center;gap:8px;padding:.65rem 1rem;background:var(--purple-l);border-bottom:1px solid var(--border);flex-wrap:wrap;}
-.ppill{font-size:12px;font-weight:700;padding:5px 13px;border-radius:20px;border:2px solid var(--border);background:#fff;color:var(--muted);transition:all .2s;}
-.ppill.active{background:var(--purple);color:#fff;border-color:var(--purple);}
-.ppill.done{background:var(--teal);color:#fff;border-color:var(--teal);}
+  /* ── Screens ── */
+  .screen { display: none; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
 
-.main{max-width:780px;margin:0 auto;padding:1.75rem 1rem 3rem;}
-.card{background:var(--card);border:.5px solid var(--border);border-radius:18px;padding:1.25rem 1.5rem;margin-bottom:12px;}
-.clabel{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:1rem;}
+  /* ── INTRO SCREEN ── */
+  #screen-intro {
+    background: linear-gradient(160deg, #fff9e8 0%, #fde9cb 100%);
+    justify-content: center; padding: 32px 20px;
+  }
+  .intro-card {
+    background: white;
+    border-radius: 32px;
+    padding: 40px 36px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,.1);
+    border: 3px solid var(--yellow);
+  }
+  .intro-emoji { font-size: 72px; line-height: 1; margin-bottom: 12px; }
+  .intro-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 36px;
+    color: var(--orange);
+    margin-bottom: 8px;
+    line-height: 1.1;
+  }
+  .intro-sub { font-size: 17px; color: #666; margin-bottom: 28px; }
+  .name-label { font-weight: 800; font-size: 15px; color: var(--dark); margin-bottom: 8px; display: block; text-align: left; }
+  .name-input {
+    width: 100%; padding: 14px 18px; border-radius: 14px;
+    border: 3px solid #e0e0e0; font-family: 'Nunito', sans-serif;
+    font-size: 18px; font-weight: 700; outline: none;
+    transition: border-color .2s;
+    margin-bottom: 20px;
+  }
+  .name-input:focus { border-color: var(--orange); }
+  .rule-box {
+    background: #fff8e8; border-radius: 16px; padding: 16px 20px;
+    border-left: 5px solid var(--yellow); text-align: left;
+    margin-bottom: 24px;
+  }
+  .rule-box h3 { font-size: 14px; font-weight: 800; color: var(--orange); margin-bottom: 6px; }
+  .rule-box p { font-size: 14px; color: #555; line-height: 1.5; }
+  .rule-box strong { color: var(--dark); }
+  .btn-start {
+    background: var(--orange); color: white; border: none;
+    border-radius: 50px; font-family: 'Fredoka One', cursive;
+    font-size: 24px; padding: 16px 52px; cursor: pointer;
+    box-shadow: 0 4px 0 #c94f22;
+    transition: transform .1s, box-shadow .1s;
+    width: 100%;
+  }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #c94f22; }
+  .btn-start:active { transform: translateY(2px); box-shadow: 0 2px 0 #c94f22; }
 
-/* drag & drop */
-.dnd-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
-.col-label{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;text-align:center;}
-.drag-card{background:var(--card);border:2.5px solid var(--border);border-radius:14px;padding:.75rem 1.1rem;font-family:'Fredoka One',cursive;font-size:1.35rem;text-align:center;margin-bottom:10px;cursor:grab;transition:transform .15s,box-shadow .15s,border-color .15s,background .15s;position:relative;min-height:58px;display:flex;align-items:center;justify-content:center;}
-.drag-card:hover:not(.dc-locked):not(.dc-dragging){transform:translateY(-2px) scale(1.02);box-shadow:0 6px 20px rgba(124,92,191,.18);border-color:var(--purple);}
-.drag-card.dc-dragging{opacity:.35;cursor:grabbing;}
-.drag-card.dc-locked{background:var(--teal-l);border-color:var(--teal);color:var(--teal-d);cursor:default;}
-.drag-card.dc-locked::after{content:'✓';position:absolute;right:11px;font-size:.95rem;font-family:sans-serif;}
-.drag-card.dc-shake{animation:shake .35s ease;border-color:var(--coral);background:var(--coral-l);color:var(--coral-d);}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
-.drop-zone{position:relative;border:2.5px dashed var(--border);border-radius:14px;padding:.75rem 1.1rem;min-height:58px;margin-bottom:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:border-color .15s,background .15s;}
-.dz-word{font-family:'Fredoka One',cursive;font-size:1.35rem;color:var(--text);}
-.dz-hint{font-size:.7rem;font-weight:700;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;}
-.drop-zone.dz-over{border-color:var(--purple);background:var(--purple-l);}
-.drop-zone.dz-matched{border-style:solid;border-color:var(--teal);background:var(--teal-l);}
-.drop-zone.dz-matched .dz-word{color:var(--teal-d);}
-.drop-zone.dz-matched .dz-hint{display:none;}
-.drop-zone.dz-matched::after{content:'✓';position:absolute;right:13px;font-size:.95rem;color:var(--teal);font-family:sans-serif;}
-.drop-zone.dz-wrong{animation:flashBack .5s ease forwards;}
-@keyframes flashBack{0%{background:var(--coral-l);border-color:var(--coral)}100%{background:transparent;border-color:var(--border)}}
+  /* ── GAME SCREEN ── */
+  #screen-game { background: var(--bg); padding: 20px 16px 40px; }
 
-#drag-ghost{position:fixed;pointer-events:none;background:var(--purple);color:#fff;font-family:'Fredoka One',cursive;font-size:1.15rem;padding:.55rem 1.1rem;border-radius:12px;z-index:9999;transform:translate(-50%,-50%) rotate(-3deg) scale(1.05);display:none;white-space:nowrap;}
+  .game-header {
+    width: 100%; max-width: 600px; display: flex;
+    justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+  }
+  .player-name { font-weight: 800; font-size: 15px; color: var(--dark); }
+  .progress-wrap {
+    font-size: 13px; font-weight: 700;
+    color: var(--muted); background: white;
+    border-radius: 30px; padding: 6px 14px;
+    border: 2px solid #e8e8e8;
+  }
+  .progress-count { color: var(--blue); }
 
-/* write */
-.word-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
-.sing-box{font-family:'Fredoka One',cursive;font-size:1.3rem;min-width:125px;background:var(--purple-l);color:var(--purple-d);border-radius:10px;padding:6px 12px;text-align:center;}
-.p-arrow{font-size:1.2rem;color:var(--muted);}
-.plural-inp{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;padding:7px 12px;border-radius:10px;border:2px solid var(--border);background:#fff;color:var(--text);width:148px;outline:none;transition:border-color .2s,background .2s;}
-.plural-inp:focus{border-color:var(--purple);}
-.plural-inp.correct{border-color:var(--teal);background:var(--teal-l);color:var(--teal-d);}
-.plural-inp.wrong{border-color:var(--red);background:var(--red-l);color:var(--red-d);}
-.hint-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;}
-.h-z{background:var(--coral-l);color:var(--coral-d);}
-.h-cons{background:var(--teal-l);color:var(--teal-d);}
-.h-voc{background:var(--purple-l);color:var(--purple-d);}
-.h-esp{background:var(--amber-l);color:var(--amber-d);}
-.wfb{font-size:12px;font-weight:700;min-width:110px;}
-.wfb.ok{color:var(--teal);}
-.wfb.no{color:var(--red);}
-.z-trick{font-size:.82rem;color:var(--muted);margin:-6px 0 10px 140px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
-.zt-strike{text-decoration:line-through;color:var(--red);font-weight:700;}
-.zt-res{font-weight:700;color:var(--teal-d);}
+  .progress-bar-outer {
+    width: 100%; max-width: 600px;
+    background: #e8e8e8; border-radius: 30px;
+    height: 10px; margin-bottom: 24px; overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%; border-radius: 30px;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    transition: width .4s ease;
+  }
 
-/* sentences */
-.sent-block{margin-bottom:1.25rem;}
-.sent-text{font-size:1rem;line-height:1.9;color:var(--text);display:flex;align-items:center;flex-wrap:wrap;gap:5px;}
-.sent-inp{font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:700;padding:4px 10px;border-radius:8px;border:2px solid var(--border);background:#fff;color:var(--text);width:145px;outline:none;transition:border-color .2s,background .2s;}
-.sent-inp:focus{border-color:var(--purple);}
-.sent-inp.correct{border-color:var(--teal);background:var(--teal-l);color:var(--teal-d);}
-.sent-inp.wrong{border-color:var(--red);background:var(--red-l);color:var(--red-d);}
-.sent-key{font-size:12px;color:var(--muted);margin-top:3px;}
-.sfb{font-size:12px;font-weight:700;margin-top:3px;min-height:18px;}
-.sfb.ok{color:var(--teal);}
-.sfb.no{color:var(--red);}
+  .question-card {
+    background: white; border-radius: 24px;
+    padding: 28px 24px 24px; max-width: 600px; width: 100%;
+    box-shadow: 0 4px 20px rgba(0,0,0,.07);
+    border: 2px solid #f0f0f0; margin-bottom: 20px;
+  }
+  .q-type-badge {
+    display: inline-block; border-radius: 30px;
+    padding: 4px 14px; font-size: 12px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .5px;
+    margin-bottom: 14px;
+  }
+  .q-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px; color: var(--dark); line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .q-word {
+    font-family: 'Fredoka One', cursive;
+    font-size: 44px; color: var(--blue);
+    text-align: center; margin: 16px 0;
+    letter-spacing: 1px;
+  }
+  .q-hint {
+    font-size: 13px; color: var(--muted);
+    font-style: italic; margin-bottom: 20px;
+  }
 
-/* ── PHASE 4 integrated ── */
-.p4-section{margin-bottom:1.5rem;}
-.p4-section-title{font-size:13px;font-weight:700;padding:5px 14px;border-radius:20px;display:inline-block;margin-bottom:12px;}
-.p4-drag-title{background:var(--purple-l);color:var(--purple-d);}
-.p4-write-title{background:var(--coral-l);color:var(--coral-d);}
-.p4-sent-title{background:var(--teal-l);color:var(--teal-d);}
+  /* Options */
+  .options-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .option-btn {
+    padding: 16px 12px; border-radius: 16px;
+    border: 3px solid #e8e8e8; background: white;
+    font-family: 'Fredoka One', cursive; font-size: 22px;
+    color: var(--dark); cursor: pointer; text-align: center;
+    transition: all .15s; position: relative;
+    box-shadow: 0 2px 0 #e0e0e0;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--blue); background: #f0f8ff;
+    transform: translateY(-2px); box-shadow: 0 4px 0 #b8d8f0;
+  }
+  .option-btn.correct {
+    border-color: var(--green); background: #e8fff8;
+    color: #05a67a; box-shadow: 0 2px 0 #05a67a;
+  }
+  .option-btn.wrong {
+    border-color: var(--red); background: #fff0f4;
+    color: var(--red); box-shadow: 0 2px 0 #c93558;
+  }
+  .option-btn.show-correct {
+    border-color: var(--green); background: #e8fff8;
+    color: #05a67a;
+  }
+  .option-btn:disabled { cursor: default; }
 
-.p4-mini-dnd{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:8px;}
-.p4-drag-card{background:var(--card);border:2.5px solid var(--border);border-radius:12px;padding:.65rem 1rem;font-family:'Fredoka One',cursive;font-size:1.2rem;text-align:center;margin-bottom:8px;cursor:grab;transition:transform .15s,box-shadow .15s,border-color .15s,background .15s;position:relative;min-height:52px;display:flex;align-items:center;justify-content:center;}
-.p4-drag-card:hover:not(.dc-locked):not(.dc-dragging){transform:translateY(-2px);box-shadow:0 5px 16px rgba(124,92,191,.15);border-color:var(--purple);}
-.p4-drag-card.dc-dragging{opacity:.35;}
-.p4-drag-card.dc-locked{background:var(--teal-l);border-color:var(--teal);color:var(--teal-d);cursor:default;}
-.p4-drag-card.dc-locked::after{content:'✓';position:absolute;right:10px;font-size:.9rem;font-family:sans-serif;}
-.p4-drag-card.dc-shake{animation:shake .35s ease;}
-.p4-drop-zone{position:relative;border:2.5px dashed var(--border);border-radius:12px;padding:.65rem 1rem;min-height:52px;margin-bottom:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:border-color .15s,background .15s;}
-.p4-drop-zone .dz-word{font-size:1.2rem;}
-.p4-drop-zone.dz-over{border-color:var(--purple);background:var(--purple-l);}
-.p4-drop-zone.dz-matched{border-style:solid;border-color:var(--teal);background:var(--teal-l);}
-.p4-drop-zone.dz-matched .dz-word{color:var(--teal-d);}
-.p4-drop-zone.dz-matched .dz-hint{display:none;}
-.p4-drop-zone.dz-matched::after{content:'✓';position:absolute;right:12px;font-size:.9rem;color:var(--teal);font-family:sans-serif;}
-.p4-drop-zone.dz-wrong{animation:flashBack .5s ease forwards;}
+  /* Feedback */
+  .feedback-bar {
+    max-width: 600px; width: 100%;
+    border-radius: 14px; padding: 14px 20px;
+    font-size: 16px; font-weight: 700;
+    display: none; align-items: center; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .feedback-bar.correct-fb { background: #e8fff8; border: 2px solid var(--green); color: #05a67a; display: flex; }
+  .feedback-bar.wrong-fb { background: #fff0f4; border: 2px solid var(--red); color: var(--red); display: flex; }
+  .feedback-icon { font-size: 22px; flex-shrink: 0; }
 
-/* challenge badge */
-.challenge-banner{background:linear-gradient(135deg,var(--purple) 0%,#534AB7 100%);border-radius:14px;padding:1.1rem 1.5rem;margin-bottom:1.25rem;text-align:center;}
-.ch-title{font-family:'Fredoka One',cursive;font-size:1.4rem;color:#fff;margin-bottom:4px;}
-.ch-sub{font-size:.9rem;color:rgba(255,255,255,.8);}
+  .btn-next {
+    background: var(--blue); color: white; border: none;
+    border-radius: 50px; font-family: 'Fredoka One', cursive;
+    font-size: 20px; padding: 14px 48px; cursor: pointer;
+    box-shadow: 0 4px 0 #0b6585;
+    transition: transform .1s, box-shadow .1s;
+    display: none;
+  }
+  .btn-next.visible { display: inline-block; }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #0b6585; }
+  .btn-next:active { transform: translateY(2px); box-shadow: 0 2px 0 #0b6585; }
 
-/* buttons */
-.btn{display:inline-block;padding:9px 22px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;border-radius:50px;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;}
-.btn:active{transform:scale(.97);}
-.btn-purple{background:var(--purple);color:#fff;box-shadow:0 4px 14px rgba(124,92,191,.3);}
-.btn-purple:hover{box-shadow:0 6px 18px rgba(124,92,191,.4);}
-.btn-teal{background:var(--teal);color:#fff;box-shadow:0 4px 14px rgba(27,158,117,.3);}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.1rem;align-items:center;}
-.snote{font-size:13px;color:var(--muted);}
+  /* ── RESULTS SCREEN ── */
+  #screen-results {
+    justify-content: center; padding: 32px 20px;
+  }
+  #screen-results.pass-bg { background: linear-gradient(160deg, #e8fff5 0%, #d0f7e8 100%); }
+  #screen-results.fail-bg { background: linear-gradient(160deg, #fff5f7 0%, #fde8ed 100%); }
 
-/* result */
-.result-wrap{text-align:center;padding:2.5rem 1.5rem;}
-.re-emoji{font-size:4rem;margin-bottom:.5rem;}
-.re-title{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--purple);margin-bottom:.4rem;}
-.re-sub{font-size:1rem;color:var(--muted);margin-bottom:.75rem;}
-.re-score{font-family:'Fredoka One',cursive;font-size:1.7rem;color:var(--amber);margin-bottom:1.25rem;}
-.stars-row{display:flex;justify-content:center;gap:6px;margin-bottom:1.25rem;font-size:2rem;}
+  .results-card {
+    background: white; border-radius: 32px;
+    padding: 40px 32px; max-width: 500px; width: 100%;
+    text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,.1);
+  }
+  .results-emoji { font-size: 72px; margin-bottom: 12px; }
+  .results-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 32px; margin-bottom: 8px;
+  }
+  .results-title.pass { color: var(--green); }
+  .results-title.fail { color: var(--red); }
+  .results-sub { font-size: 16px; color: #666; margin-bottom: 24px; line-height: 1.5; }
 
-.cf{position:fixed;width:10px;height:10px;border-radius:2px;pointer-events:none;z-index:9999;animation:fall linear forwards;}
-@keyframes fall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
+  .score-big {
+    font-family: 'Fredoka One', cursive;
+    font-size: 72px; line-height: 1;
+  }
+  .score-big.pass { color: var(--green); }
+  .score-big.fail { color: var(--red); }
+  .score-label { font-size: 14px; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+  .score-fraction { font-size: 20px; font-weight: 800; color: #555; margin-bottom: 28px; }
 
-@media(max-width:560px){
-  .gtitle{font-size:1.25rem;}
-  .dnd-grid,.p4-mini-dnd{grid-template-columns:1fr;}
-  .drag-card,.dz-word,.p4-drag-card,.p4-drop-zone .dz-word{font-size:1.05rem;}
-  .sing-box{font-size:1.05rem;min-width:100px;}
-  .plural-inp,.sent-inp{width:118px;}
-  .card{padding:1rem;}
-  .z-trick{margin-left:0;}
-}
+  .threshold-bar-outer {
+    background: #f0f0f0; border-radius: 30px; height: 16px;
+    margin-bottom: 8px; overflow: hidden; position: relative;
+  }
+  .threshold-bar-inner {
+    height: 100%; border-radius: 30px;
+    transition: width 1s ease;
+  }
+  .threshold-bar-inner.pass { background: linear-gradient(90deg, #06d6a0, #05a67a); }
+  .threshold-bar-inner.fail { background: linear-gradient(90deg, #ff8fab, #ef476f); }
+  .threshold-mark {
+    position: absolute; top: -4px; left: 70%;
+    width: 3px; height: 24px; background: var(--dark);
+    border-radius: 2px;
+  }
+  .threshold-note {
+    display: flex; justify-content: flex-end;
+    font-size: 12px; font-weight: 700; color: var(--muted);
+    margin-bottom: 28px; padding-right: 4px;
+  }
+
+  .review-list { text-align: left; margin-bottom: 28px; }
+  .review-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; border-radius: 12px; margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .review-item.ok { background: #f0fff9; }
+  .review-item.err { background: #fff5f7; }
+  .review-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .review-text { flex: 1; }
+  .review-q { font-weight: 700; color: var(--dark); }
+  .review-answer { color: var(--muted); font-size: 13px; }
+  .review-correct { color: var(--green); font-weight: 700; font-size: 13px; }
+
+  .btn-advance {
+    background: var(--green); color: white; border: none;
+    border-radius: 50px; font-family: 'Fredoka One', cursive;
+    font-size: 22px; padding: 16px 48px; cursor: pointer;
+    box-shadow: 0 4px 0 #04a67a;
+    transition: transform .1s, box-shadow .1s; width: 100%;
+    margin-bottom: 12px;
+  }
+  .btn-advance:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #04a67a; }
+  .btn-retry {
+    background: var(--orange); color: white; border: none;
+    border-radius: 50px; font-family: 'Fredoka One', cursive;
+    font-size: 22px; padding: 16px 48px; cursor: pointer;
+    box-shadow: 0 4px 0 #c94f22;
+    transition: transform .1s, box-shadow .1s; width: 100%;
+    margin-bottom: 12px;
+  }
+  .btn-retry:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #c94f22; }
+  .btn-retry:active, .btn-advance:active { transform: translateY(2px); box-shadow: 0 2px 0; }
+
+  /* ── VICTORY ── */
+  #screen-victory {
+    background: linear-gradient(160deg, #fff9e8 0%, #fde9cb 100%);
+    justify-content: center; padding: 32px 20px;
+  }
+  .victory-card {
+    background: white; border-radius: 32px; padding: 44px 32px;
+    max-width: 480px; width: 100%; text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,.1);
+    border: 4px solid var(--yellow);
+  }
+  .victory-emoji { font-size: 80px; margin-bottom: 8px; }
+  .victory-title {
+    font-family: 'Fredoka One', cursive; font-size: 38px;
+    color: var(--orange); margin-bottom: 8px;
+  }
+  .victory-sub { font-size: 17px; color: #555; margin-bottom: 28px; line-height: 1.5; }
+  .stars-row { font-size: 48px; margin-bottom: 20px; }
+  .victory-score {
+    font-family: 'Fredoka One', cursive; font-size: 52px;
+    color: var(--purple); margin-bottom: 4px;
+  }
+  .victory-score-label { font-size: 14px; color: var(--muted); font-weight: 700; margin-bottom: 28px; }
+  .btn-restart {
+    background: var(--purple); color: white; border: none;
+    border-radius: 50px; font-family: 'Fredoka One', cursive;
+    font-size: 20px; padding: 14px 40px; cursor: pointer;
+    box-shadow: 0 4px 0 #7b3fc7;
+    transition: transform .1s;
+  }
+  .btn-restart:hover { transform: translateY(-2px); }
+
+  @media (max-width: 400px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .q-word { font-size: 36px; }
+  }
 </style>
 </head>
 <body>
+<canvas id="confetti-canvas"></canvas>
 
-<header>
-  <div class="gtitle">Plurales Irregulares</div>
-  <div class="hright">
-    <div class="hbadge" id="phase-label">Parte 1 de 4</div>
-    <div class="hscore">⭐ <span id="score">0</span></div>
+<!-- ══════════════ INTRO ══════════════ -->
+<div id="screen-intro" class="screen active">
+  <div class="intro-card">
+    <div class="intro-emoji">📚✏️</div>
+    <div class="intro-title">Plurales Irregulares</div>
+    <p class="intro-sub">Practica los plurales que cambian de <strong>-z</strong> a <strong>-ces</strong></p>
+
+    <label class="name-label">¿Cómo te llamas?</label>
+    <input class="name-input" id="nameInput" type="text" placeholder="Escribe tu nombre..." maxlength="30" />
+
+    <div class="rule-box">
+      <h3>📖 La regla de oro</h3>
+      <p>Cuando una palabra termina en <strong>-z</strong>, el plural cambia la <strong>z</strong> por <strong>ces</strong>.<br>
+      Ejemplo: <strong>lápiz → lápices</strong></p>
+    </div>
+    <button class="btn-start" onclick="startGame()">¡Empezar! 🚀</button>
   </div>
-</header>
-
-<div class="phase-bar">
-  <div class="ppill active" id="pill-1">1 — Arrastra</div>
-  <div class="ppill" id="pill-2">2 — Escribe</div>
-  <div class="ppill" id="pill-3">3 — Oraciones</div>
-  <div class="ppill" id="pill-4">4 — Desafío final</div>
 </div>
 
-<div class="main" id="main"></div>
-<div id="drag-ghost"></div>
+<!-- ══════════════ GAME ══════════════ -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <span class="player-name" id="gamePlayerName">🌟 Jugador</span>
+    <span class="progress-wrap">Pregunta <span class="progress-count" id="progressCount">1</span> de <span id="totalCount">10</span></span>
+  </div>
+  <div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="progressBarInner" style="width:0%"></div>
+  </div>
+
+  <div class="question-card" id="questionCard">
+    <span class="q-type-badge" id="qTypeBadge">Singular → Plural</span>
+    <div class="q-text" id="qText">¿Cuál es el plural de esta palabra?</div>
+    <div class="q-word" id="qWord">lápiz</div>
+    <div class="q-hint" id="qHint">Recuerda: la -z cambia a -ces</div>
+    <div class="options-grid" id="optionsGrid"></div>
+  </div>
+
+  <div class="feedback-bar" id="feedbackBar">
+    <span class="feedback-icon" id="feedbackIcon">✅</span>
+    <span id="feedbackText">¡Correcto!</span>
+  </div>
+  <button class="btn-next" id="btnNext" onclick="nextQuestion()">Siguiente →</button>
+</div>
+
+<!-- ══════════════ RESULTS ══════════════ -->
+<div id="screen-results" class="screen">
+  <div class="results-card" id="resultsCard">
+    <div class="results-emoji" id="resultsEmoji">🎉</div>
+    <div class="results-title" id="resultsTitle">¡Excelente!</div>
+    <p class="results-sub" id="resultsSub"></p>
+    <div class="score-big" id="scoreBig">80%</div>
+    <div class="score-label">Tu puntaje</div>
+    <div class="score-fraction" id="scoreFraction">8 de 10 correctas</div>
+
+    <div class="threshold-bar-outer">
+      <div class="threshold-bar-inner" id="thresholdBarInner" style="width:0%"></div>
+      <div class="threshold-mark"></div>
+    </div>
+    <div class="threshold-note">← 70% necesario para avanzar</div>
+
+    <div class="review-list" id="reviewList"></div>
+
+    <button class="btn-advance" id="btnAdvance" onclick="advanceGame()" style="display:none">
+      ¡Continuar al siguiente nivel! 🌟
+    </button>
+    <button class="btn-retry" id="btnRetry" onclick="retryGame()" style="display:none">
+      🔄 Intentar de nuevo
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════ VICTORY ══════════════ -->
+<div id="screen-victory" class="screen">
+  <div class="victory-card">
+    <div class="victory-emoji">🏆</div>
+    <div class="victory-title" id="victoryTitle">¡Campeón/Campeona!</div>
+    <p class="victory-sub" id="victorySub"></p>
+    <div class="stars-row" id="starsRow">⭐⭐⭐</div>
+    <div class="victory-score" id="victoryScore">95%</div>
+    <div class="victory-score-label">Puntaje final</div>
+    <button class="btn-restart" onclick="restartAll()">Jugar de nuevo 🔄</button>
+  </div>
+</div>
 
 <script>
-const WORDS=[
-  {s:'rey',p:'reyes',type:'voc',hint:'vocal → +es'},
-  {s:'veloz',p:'veloces',type:'z',hint:'z → ces'},
-  {s:'codorniz',p:'codornices',type:'z',hint:'z → ces'},
-  {s:'luz',p:'luces',type:'z',hint:'z → ces'},
-  {s:'arroz',p:'arroces',type:'z',hint:'z → ces'},
-  {s:'tapiz',p:'tapices',type:'z',hint:'z → ces'},
-  {s:'disfraz',p:'disfraces',type:'z',hint:'z → ces'},
-  {s:'sí',p:'síes',type:'esp',hint:'especial'},
-  {s:'paz',p:'paces',type:'z',hint:'z → ces'},
-  {s:'álbum',p:'álbumes',type:'cons',hint:'consonante → +es'},
-  {s:'ley',p:'leyes',type:'voc',hint:'vocal → +es'},
-  {s:'eficaz',p:'eficaces',type:'z',hint:'z → ces'},
-];
-const SENTENCES=[
-  {before:'El cielo se iluminó con muchas ',word:'luz',after:' de colores.',answer:'luces'},
-  {before:'Los ',word:'rey',after:' gobernaron por muchos años.',answer:'reyes'},
-  {before:'En el lago nadaban muchos ',word:'pez',after:' brillantes.',answer:'peces'},
-  {before:'Los estudiantes usaron sus ',word:'lápiz',after:' para dibujar.',answer:'lápices'},
-  {before:'Durante la fiesta todos llevaron ',word:'disfraz',after:' divertidos.',answer:'disfraces'},
-  {before:'Las ',word:'ley',after:' del país deben respetarse.',answer:'leyes'},
-  {before:'Los vecinos piden más ',word:'paz',after:' en la comunidad.',answer:'paces'},
-  {before:'Mi mamá tiene varios ',word:'álbum',after:' de fotos de la familia.',answer:'álbumes'},
-  {before:'Las ',word:'codorniz',after:' viven en el campo.',answer:'codornices'},
-  {before:'Los doctores son personas muy ',word:'eficaz',after:' en su trabajo.',answer:'eficaces'},
-];
-
-// Phase 4 integrated data — new sentences + mixed write prompts
-const P4_DRAG=[
-  {s:'veloz',p:'veloces',type:'z',hint:'z → ces'},
-  {s:'álbum',p:'álbumes',type:'cons',hint:'consonante → +es'},
-  {s:'paz',p:'paces',type:'z',hint:'z → ces'},
-  {s:'ley',p:'leyes',type:'voc',hint:'vocal → +es'},
-];
-const P4_WRITE=[
-  {s:'codorniz',p:'codornices',type:'z',hint:'z → ces'},
-  {s:'disfraz',p:'disfraces',type:'z',hint:'z → ces'},
-  {s:'rey',p:'reyes',type:'voc',hint:'vocal → +es'},
-  {s:'eficaz',p:'eficaces',type:'z',hint:'z → ces'},
-];
-const P4_SENT=[
-  {before:'Las ',word:'luz',after:' de la ciudad brillaban mucho de noche.',answer:'luces'},
-  {before:'En el mercado vendían ',word:'tapiz',after:' muy coloridos.',answer:'tapices'},
-  {before:'Los músicos grabaron varios ',word:'álbum',after:' este año.',answer:'álbumes'},
-  {before:'El estudiante pidió más ',word:'lápiz',after:' para su clase de arte.',answer:'lápices'},
+// ═══════════════════════════════════════════
+// QUESTION BANK
+// ═══════════════════════════════════════════
+const allQuestions = [
+  // ── Singular → Plural (type: 'sp') ──
+  { type:'sp', word:'lápiz',   correct:'lápices',  wrong:['lápizes','lápizs','lápicess'] },
+  { type:'sp', word:'nariz',   correct:'narices',  wrong:['narizes','narizs','naricees'] },
+  { type:'sp', word:'pez',     correct:'peces',    wrong:['pezes','pezs','pecees'] },
+  { type:'sp', word:'voz',     correct:'voces',    wrong:['vozes','vozs','vocees'] },
+  { type:'sp', word:'luz',     correct:'luces',    wrong:['luzes','luzs','lucees'] },
+  { type:'sp', word:'vez',     correct:'veces',    wrong:['vezes','vezs','vecees'] },
+  { type:'sp', word:'feliz',   correct:'felices',  wrong:['felizes','felizs','felicees'] },
+  { type:'sp', word:'cruz',    correct:'cruces',   wrong:['cruzes','cruzs','crucees'] },
+  { type:'sp', word:'actriz',  correct:'actrices', wrong:['atrices','actrizs','actricees'] },
+  { type:'sp', word:'juez',    correct:'jueces',   wrong:['juezes','juezs','juecees'] },
+  // ── Plural → Singular (type: 'ps') ──
+  { type:'ps', word:'lápices', correct:'lápiz',   wrong:['lápizes','lápicez','lápics'] },
+  { type:'ps', word:'narices', correct:'nariz',   wrong:['naricez','nariz','naris'] },
+  { type:'ps', word:'peces',   correct:'pez',     wrong:['pecez','pec','pecen'] },
+  { type:'ps', word:'voces',   correct:'voz',     wrong:['vocez','voc','vocen'] },
+  { type:'ps', word:'luces',   correct:'luz',     wrong:['lucez','luc','lucen'] },
+  { type:'ps', word:'veces',   correct:'vez',     wrong:['vecez','vec','vecen'] },
+  { type:'ps', word:'felices', correct:'feliz',   wrong:['felicez','felic','felicen'] },
+  { type:'ps', word:'cruces',  correct:'cruz',    wrong:['crucez','cruc','crucen'] },
+  { type:'ps', word:'jueces',  correct:'juez',    wrong:['juecez','juec','juecen'] },
+  // ── Choose the correct plural (type: 'choose') ──
+  { type:'choose', word:'¿Cuál es el plural de "actriz"?',
+    correct:'actrices', wrong:['atrices','actrizs','actricez'] },
+  { type:'choose', word:'¿Cuál es el plural de "nariz"?',
+    correct:'narices', wrong:['narizes','narecs','naricez'] },
+  { type:'choose', word:'¿Cuál es el plural de "feliz"?',
+    correct:'felices', wrong:['felizes','felizas','felicez'] },
 ];
 
-const COLORS=['#7C5CBF','#1B9E75','#E05A2B','#D4860F','#E24B4A'];
-let score=0,dragId=null,dndRound=0,dndMatched=0;
-let p2done=false,p3done=false,p4done=false;
-let p4DndId=null,p4DndMatched=0;
+// ═══════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════
+const QUESTIONS_PER_ROUND = 10;
+const PASS_THRESHOLD = 0.70;
+const MAX_ROUNDS = 2; // 2 rounds to win
 
-const DND_ROUNDS=[WORDS.slice(0,6),WORDS.slice(6,12)];
+let playerName = '';
+let round = 1;
+let roundQuestions = [];
+let currentQ = 0;
+let roundCorrect = 0;
+let roundAnswers = [];
+let answered = false;
+let totalCorrect = 0;
+let totalAsked = 0;
 
-function norm(s){return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
-function hc(t){return t==='z'?'h-z':t==='cons'?'h-cons':t==='esp'?'h-esp':'h-voc';}
-function setPills(a){
-  [1,2,3,4].forEach(n=>{
-    document.getElementById('pill-'+n).className='ppill'+(n===a?' active':n<a?' done':'');
-  });
-  document.getElementById('phase-label').textContent='Parte '+a+' de 4';
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
-/* ════════════ PHASE 1 ════════════ */
-function buildP1(){setPills(1);dndRound=0;dndMatched=0;renderDnd();}
-function renderDnd(){
-  const pairs=DND_ROUNDS[dndRound];
-  const shuffled=[...pairs].sort(()=>Math.random()-.5);
-  let h=`<div class="card"><div class="clabel">Arrastra cada singular a su plural — grupo ${dndRound+1} de 2</div>
-    <div class="dnd-grid">
-      <div><div class="col-label">Singular — arrastra</div><div id="sc">`;
-  pairs.forEach((w,i)=>h+=`<div class="drag-card" id="dc-${i}" data-id="${i}" data-phase="1">${w.s}</div>`);
-  h+=`</div></div><div><div class="col-label">Plural — suelta aquí</div><div id="zc">`;
-  shuffled.forEach(w=>{
-    const ci=pairs.indexOf(w);
-    h+=`<div class="drop-zone" data-correct="${ci}" data-phase="1"><span class="dz-word">${w.p}</span><span class="dz-hint hint-tag ${hc(w.type)}">${w.hint}</span></div>`;
-  });
-  h+=`</div></div></div></div>`;
-  document.getElementById('main').innerHTML=h;
-  attachDnd('[data-phase="1"]','[data-phase="1"]');
+// ═══════════════════════════════════════════
+// START / RETRY / ADVANCE
+// ═══════════════════════════════════════════
+function startGame() {
+  const inp = document.getElementById('nameInput').value.trim();
+  playerName = inp || 'Estudiante';
+  round = 1; totalCorrect = 0; totalAsked = 0;
+  buildRound();
+  showScreen('game');
 }
 
-/* ════════════ PHASE 2 ════════════ */
-function goP2(){setPills(2);p2done=false;
-  let h=`<div class="card"><div class="clabel">Escribe el plural de cada palabra</div>`;
-  WORDS.forEach((w,i)=>{
-    const stem=w.type==='z'?w.s.slice(0,-1):'';
-    h+=`<div class="word-row"><div class="sing-box">${w.s}</div><div class="p-arrow">→</div>
-      <input class="plural-inp" id="pi-${i}" type="text" placeholder="plural..." autocomplete="off" spellcheck="false">
-      <span class="hint-tag ${hc(w.type)}">${w.hint}</span><div class="wfb" id="wf-${i}"></div></div>`;
-    if(w.type==='z')h+=`<div class="z-trick">Tacha la z: <strong style="color:var(--coral-d)">${stem}<span class="zt-strike">z</span></strong> → escribe <span class="zt-res">${stem}ces</span></div>`;
-  });
-  h+=`<div class="btn-row"><button class="btn btn-purple" id="ck2">Revisar respuestas</button><span class="snote" id="n2"></span></div></div>`;
-  document.getElementById('main').innerHTML=h;
-  WORDS.forEach((_,i)=>document.getElementById(`pi-${i}`).addEventListener('keydown',e=>{if(e.key==='Enter')ckP2();}));
-  document.getElementById('ck2').onclick=ckP2;
-}
-function ckP2(){
-  if(p2done){goP3();return;}
-  let c=0,f=0;
-  WORDS.forEach((w,i)=>{
-    const inp=document.getElementById(`pi-${i}`),fb=document.getElementById(`wf-${i}`);
-    if(!inp.value.trim()){fb.textContent='';inp.className='plural-inp';return;}
-    f++;
-    if(norm(inp.value)===norm(w.p)){inp.className='plural-inp correct';fb.textContent='✓ correcto';fb.className='wfb ok';c++;}
-    else{inp.className='plural-inp wrong';fb.textContent='✗ es: '+w.p;fb.className='wfb no';}
-  });
-  score+=c*5;document.getElementById('score').textContent=score;
-  document.getElementById('n2').textContent=`${c} de ${f} correctas`;
-  const btn=document.getElementById('ck2');btn.textContent='Continuar a las oraciones →';btn.className='btn btn-teal';
-  p2done=true;
+function buildRound() {
+  // Pick QUESTIONS_PER_ROUND questions, balanced sp/ps/choose
+  const sp = shuffle(allQuestions.filter(q=>q.type==='sp'));
+  const ps = shuffle(allQuestions.filter(q=>q.type==='ps'));
+  const ch = shuffle(allQuestions.filter(q=>q.type==='choose'));
+  // 5 sp + 3 ps + 2 choose
+  roundQuestions = [...sp.slice(0,5), ...ps.slice(0,3), ...ch.slice(0,2)];
+  roundQuestions = shuffle(roundQuestions);
+  currentQ = 0; roundCorrect = 0; roundAnswers = [];
+  renderQuestion();
 }
 
-/* ════════════ PHASE 3 ════════════ */
-function goP3(){setPills(3);p3done=false;
-  let h=`<div class="card"><div class="clabel">Completa cada oración con el plural correcto</div>`;
-  SENTENCES.forEach((s,i)=>{
-    h+=`<div class="sent-block"><div class="sent-text">${s.before}<input class="sent-inp" id="si-${i}" type="text" placeholder="${s.word}..." autocomplete="off" spellcheck="false">${s.after}</div>
-      <div class="sent-key">(plural de: <strong>${s.word}</strong>)</div><div class="sfb" id="sf-${i}"></div></div>`;
-  });
-  h+=`<div class="btn-row"><button class="btn btn-purple" id="ck3">Revisar oraciones</button><span class="snote" id="n3"></span></div></div>`;
-  document.getElementById('main').innerHTML=h;
-  SENTENCES.forEach((_,i)=>document.getElementById(`si-${i}`).addEventListener('keydown',e=>{if(e.key==='Enter')ckP3();}));
-  document.getElementById('ck3').onclick=ckP3;
-}
-function ckP3(){
-  if(p3done){goP4();return;}
-  let c=0,f=0;
-  SENTENCES.forEach((s,i)=>{
-    const inp=document.getElementById(`si-${i}`),fb=document.getElementById(`sf-${i}`);
-    if(!inp.value.trim()){fb.textContent='';inp.className='sent-inp';return;}
-    f++;
-    if(norm(inp.value)===norm(s.answer)){inp.className='sent-inp correct';fb.textContent='✓ correcto';fb.className='sfb ok';c++;}
-    else{inp.className='sent-inp wrong';fb.textContent='✗ es: '+s.answer;fb.className='sfb no';}
-  });
-  score+=c*10;document.getElementById('score').textContent=score;
-  document.getElementById('n3').textContent=`${c} de ${f} correctas`;
-  const btn=document.getElementById('ck3');btn.textContent='Continuar al desafío final →';btn.className='btn btn-teal';
-  p3done=true;
+function retryGame() {
+  buildRound();
+  showScreen('game');
 }
 
-/* ════════════ PHASE 4 — INTEGRATED ════════════ */
-function goP4(){
-  setPills(4);p4done=false;p4DndId=null;p4DndMatched=0;
-  const shuffledDrop=[...P4_DRAG].sort(()=>Math.random()-.5);
-
-  let h=`<div class="challenge-banner">
-    <div class="ch-title">Desafío final</div>
-    <div class="ch-sub">Las tres actividades juntas — sin pistas de reglas</div>
-  </div>`;
-
-  // Section A: drag & drop
-  h+=`<div class="card"><div class="p4-section">
-    <span class="p4-section-title p4-drag-title">A — Arrastra el singular a su plural</span>
-    <div class="p4-mini-dnd">
-      <div><div class="col-label">Singular</div><div id="p4-sc">`;
-  P4_DRAG.forEach((w,i)=>h+=`<div class="p4-drag-card drag-card" id="p4dc-${i}" data-id="${i}" data-phase="4">${w.s}</div>`);
-  h+=`</div></div><div><div class="col-label">Plural</div><div id="p4-zc">`;
-  shuffledDrop.forEach(w=>{
-    const ci=P4_DRAG.indexOf(w);
-    h+=`<div class="p4-drop-zone drop-zone" data-correct="${ci}" data-phase="4"><span class="dz-word">${w.p}</span><span class="dz-hint hint-tag ${hc(w.type)}">${w.hint}</span></div>`;
-  });
-  h+=`</div></div></div></div>`;
-
-  // Section B: write
-  h+=`<div class="p4-section" style="margin-top:1rem">
-    <span class="p4-section-title p4-write-title">B — Escribe el plural (sin ayuda)</span>`;
-  P4_WRITE.forEach((w,i)=>{
-    h+=`<div class="word-row"><div class="sing-box">${w.s}</div><div class="p-arrow">→</div>
-      <input class="plural-inp" id="p4pi-${i}" type="text" placeholder="plural..." autocomplete="off" spellcheck="false">
-      <div class="wfb" id="p4wf-${i}"></div></div>`;
-  });
-  h+=`</div>`;
-
-  // Section C: sentences
-  h+=`<div class="p4-section" style="margin-top:1rem">
-    <span class="p4-section-title p4-sent-title">C — Completa las oraciones</span>`;
-  P4_SENT.forEach((s,i)=>{
-    h+=`<div class="sent-block"><div class="sent-text">${s.before}<input class="sent-inp" id="p4si-${i}" type="text" placeholder="${s.word}..." autocomplete="off" spellcheck="false">${s.after}</div>
-      <div class="sent-key">(plural de: <strong>${s.word}</strong>)</div><div class="sfb" id="p4sf-${i}"></div></div>`;
-  });
-  h+=`</div>`;
-
-  h+=`<div class="btn-row"><button class="btn btn-purple" id="ck4">Revisar todo</button><span class="snote" id="n4"></span></div></div>`;
-
-  document.getElementById('main').innerHTML=h;
-
-  // attach drag for p4
-  attachDnd('[data-phase="4"].drag-card, [data-phase="4"].p4-drag-card','[data-phase="4"]');
-
-  P4_WRITE.forEach((_,i)=>document.getElementById(`p4pi-${i}`).addEventListener('keydown',e=>{if(e.key==='Enter')ckP4();}));
-  P4_SENT.forEach((_,i)=>document.getElementById(`p4si-${i}`).addEventListener('keydown',e=>{if(e.key==='Enter')ckP4();}));
-  document.getElementById('ck4').onclick=ckP4;
-}
-
-function ckP4(){
-  if(p4done){showResult();return;}
-  let c=0,f=0;
-
-  // write
-  P4_WRITE.forEach((w,i)=>{
-    const inp=document.getElementById(`p4pi-${i}`),fb=document.getElementById(`p4wf-${i}`);
-    if(!inp.value.trim()){fb.textContent='';inp.className='plural-inp';return;}
-    f++;
-    if(norm(inp.value)===norm(w.p)){inp.className='plural-inp correct';fb.textContent='✓';fb.className='wfb ok';c++;}
-    else{inp.className='plural-inp wrong';fb.textContent='✗ '+w.p;fb.className='wfb no';}
-  });
-
-  // sentences
-  P4_SENT.forEach((s,i)=>{
-    const inp=document.getElementById(`p4si-${i}`),fb=document.getElementById(`p4sf-${i}`);
-    if(!inp.value.trim()){fb.textContent='';inp.className='sent-inp';return;}
-    f++;
-    if(norm(inp.value)===norm(s.answer)){inp.className='sent-inp correct';fb.textContent='✓ correcto';fb.className='sfb ok';c++;}
-    else{inp.className='sent-inp wrong';fb.textContent='✗ es: '+s.answer;fb.className='sfb no';}
-  });
-
-  // drag points already counted live; count locked
-  const locked=document.querySelectorAll('[data-phase="4"].dc-locked').length;
-  const dragPts=locked*15;
-  score+=c*15+dragPts;
-  document.getElementById('score').textContent=score;
-  const total=f+locked;
-  document.getElementById('n4').textContent=`${c+locked} de ${total} correctas`;
-  const btn=document.getElementById('ck4');btn.textContent='Ver resultados finales 🎉';btn.className='btn btn-teal';
-  p4done=true;
-}
-
-/* ════════════ DRAG ENGINE (shared) ════════════ */
-function attachDnd(cardSel,zoneSel){
-  document.querySelectorAll(cardSel).forEach(c=>{
-    c.addEventListener('mousedown',onMD);
-    c.addEventListener('touchstart',onTS,{passive:true});
-  });
-}
-
-const ghost=document.getElementById('drag-ghost');
-function onMD(e){const c=e.currentTarget;if(c.classList.contains('dc-locked'))return;dragId=c.dataset.id;c.classList.add('dc-dragging');ghost.textContent=c.textContent;ghost.style.display='block';mv(e.clientX,e.clientY);document.addEventListener('mousemove',onMM);document.addEventListener('mouseup',onMU);}
-function onMM(e){mv(e.clientX,e.clientY);hl(e.clientX,e.clientY);}
-function onMU(e){ghost.style.display='none';document.removeEventListener('mousemove',onMM);document.removeEventListener('mouseup',onMU);drop(gz(e.clientX,e.clientY));clr();}
-function onTS(e){const c=e.currentTarget;if(c.classList.contains('dc-locked'))return;dragId=c.dataset.id;c.classList.add('dc-dragging');ghost.textContent=c.textContent;ghost.style.display='block';const t=e.touches[0];mv(t.clientX,t.clientY);document.addEventListener('touchmove',onTM,{passive:false});document.addEventListener('touchend',onTE);}
-function onTM(e){e.preventDefault();const t=e.touches[0];mv(t.clientX,t.clientY);hl(t.clientX,t.clientY);}
-function onTE(e){ghost.style.display='none';document.removeEventListener('touchmove',onTM);document.removeEventListener('touchend',onTE);const t=e.changedTouches[0];drop(gz(t.clientX,t.clientY));clr();}
-function mv(x,y){ghost.style.left=x+'px';ghost.style.top=y+'px';}
-function gz(x,y){for(const z of document.querySelectorAll('.drop-zone,.p4-drop-zone')){const r=z.getBoundingClientRect();if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)return z;}return null;}
-function hl(x,y){clr();const z=gz(x,y);if(z&&!z.classList.contains('dz-matched'))z.classList.add('dz-over');}
-function clr(){document.querySelectorAll('.drop-zone,.p4-drop-zone').forEach(z=>z.classList.remove('dz-over'));}
-
-function drop(zone){
-  const card=document.querySelector(`.drag-card[data-id="${dragId}"],.p4-drag-card[data-id="${dragId}"]`);
-  if(!card){dragId=null;return;}
-  card.classList.remove('dc-dragging');
-  if(!zone||zone.classList.contains('dz-matched')){dragId=null;return;}
-  if(parseInt(zone.dataset.correct)===parseInt(dragId)){
-    card.classList.add('dc-locked');zone.classList.add('dz-matched');
-    const ph=zone.dataset.phase;
-    if(ph==='1'){
-      score+=10;document.getElementById('score').textContent=score;
-      dndMatched++;
-      if(dndMatched===DND_ROUNDS[dndRound].length){
-        setTimeout(()=>{if(dndRound===0){dndRound=1;dndMatched=0;renderDnd();}else{goP2();}},600);
-      }
-    }
-    // phase 4 drag is scored in ckP4
+function advanceGame() {
+  round++;
+  if (round > MAX_ROUNDS) {
+    showVictory();
   } else {
-    card.classList.add('dc-shake');zone.classList.add('dz-wrong');
-    setTimeout(()=>{card.classList.remove('dc-shake');zone.classList.remove('dz-wrong');},500);
-  }
-  dragId=null;
-}
-
-/* ════════════ RESULT ════════════ */
-function showResult(){
-  const max=12*10+12*5+10*10+(4+4+4)*15;
-  const pct=Math.round((score/max)*100);
-  const stars=pct>=85?3:pct>=65?2:1;
-  const emoji=pct>=85?'🏆':pct>=65?'⭐':'💪';
-  const msg=pct>=85?'¡Excelente trabajo!':pct>=65?'¡Buen esfuerzo!':'¡Sigue practicando!';
-  const strs=[...Array(3)].map((_,i)=>i<stars?'⭐':'☆').join('');
-  document.getElementById('main').innerHTML=`<div class="card result-wrap">
-    <div class="re-emoji">${emoji}</div>
-    <div class="re-title">${msg}</div>
-    <div class="re-sub">Completaste las 4 partes del juego</div>
-    <div class="stars-row">${strs}</div>
-    <div class="re-score">⭐ ${score} puntos — ${pct}%</div>
-    <button class="btn btn-purple" onclick="restart()">Jugar de nuevo 🔄</button>
-  </div>`;
-  confetti();
-}
-
-function restart(){
-  score=0;document.getElementById('score').textContent=0;
-  dndRound=0;dndMatched=0;p4DndMatched=0;
-  buildP1();
-}
-
-function confetti(){
-  for(let i=0;i<70;i++){
-    const el=document.createElement('div');el.className='cf';
-    el.style.left=Math.random()*100+'vw';el.style.top='-16px';
-    el.style.background=COLORS[Math.floor(Math.random()*COLORS.length)];
-    el.style.borderRadius=Math.random()>.5?'50%':'2px';
-    el.style.animationDuration=(1.5+Math.random()*2)+'s';
-    el.style.animationDelay=(Math.random()*.8)+'s';
-    document.body.appendChild(el);setTimeout(()=>el.remove(),4000);
+    buildRound();
+    showScreen('game');
   }
 }
 
-buildP1();
+function restartAll() {
+  playerName = ''; round = 1; totalCorrect = 0; totalAsked = 0;
+  document.getElementById('nameInput').value = '';
+  showScreen('intro');
+}
+
+// ═══════════════════════════════════════════
+// RENDER QUESTION
+// ═══════════════════════════════════════════
+function renderQuestion() {
+  answered = false;
+  const q = roundQuestions[currentQ];
+  const total = roundQuestions.length;
+
+  // Header
+  document.getElementById('gamePlayerName').textContent = '🌟 ' + playerName;
+  document.getElementById('progressCount').textContent = currentQ + 1;
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('progressBarInner').style.width = ((currentQ / total) * 100) + '%';
+
+  // Badge + text
+  const badge = document.getElementById('qTypeBadge');
+  const qText = document.getElementById('qText');
+  const qWord = document.getElementById('qWord');
+  const qHint = document.getElementById('qHint');
+
+  if (q.type === 'sp') {
+    badge.textContent = 'Singular → Plural';
+    badge.style.background = '#e8f4ff'; badge.style.color = '#118ab2';
+    qText.textContent = '¿Cuál es el plural de esta palabra?';
+    qWord.textContent = q.word;
+    qWord.style.display = 'block';
+    qHint.textContent = 'Recuerda: la -z cambia a -ces 💡';
+  } else if (q.type === 'ps') {
+    badge.textContent = 'Plural → Singular';
+    badge.style.background = '#f3e8ff'; badge.style.color = '#9b5de5';
+    qText.textContent = '¿Cuál es el singular de esta palabra?';
+    qWord.textContent = q.word;
+    qWord.style.display = 'block';
+    qHint.textContent = 'Recuerda: los -ces vuelven a -z 💡';
+  } else {
+    badge.textContent = 'Elige el correcto';
+    badge.style.background = '#fff3e0'; badge.style.color = '#ff6b35';
+    qText.textContent = q.word;
+    qWord.style.display = 'none';
+    qHint.textContent = 'Elige la forma correcta 💡';
+  }
+
+  // Options
+  const opts = shuffle([q.correct, ...q.wrong.slice(0,3)]);
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(btn, opt, q.correct);
+    grid.appendChild(btn);
+  });
+
+  // Reset feedback
+  const fb = document.getElementById('feedbackBar');
+  fb.className = 'feedback-bar';
+  document.getElementById('btnNext').classList.remove('visible');
+}
+
+// ═══════════════════════════════════════════
+// SELECT ANSWER
+// ═══════════════════════════════════════════
+function selectAnswer(btn, chosen, correct) {
+  if (answered) return;
+  answered = true;
+
+  const isCorrect = chosen === correct;
+  const fb = document.getElementById('feedbackBar');
+  const fbIcon = document.getElementById('feedbackIcon');
+  const fbText = document.getElementById('feedbackText');
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    fb.className = 'feedback-bar correct-fb';
+    fbIcon.textContent = '✅';
+    fbText.textContent = '¡Correcto! ¡Muy bien!';
+    roundCorrect++;
+    roundAnswers.push({q: roundQuestions[currentQ], chosen, isCorrect:true});
+  } else {
+    btn.classList.add('wrong');
+    fb.className = 'feedback-bar wrong-fb';
+    fbIcon.textContent = '❌';
+    fbText.textContent = `La respuesta correcta es: "${correct}"`;
+    roundAnswers.push({q: roundQuestions[currentQ], chosen, isCorrect:false});
+    // Highlight correct
+    document.querySelectorAll('.option-btn').forEach(b => {
+      if (b.textContent === correct) b.classList.add('show-correct');
+    });
+  }
+
+  // Disable all
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  document.getElementById('btnNext').classList.add('visible');
+}
+
+// ═══════════════════════════════════════════
+// NEXT QUESTION / END ROUND
+// ═══════════════════════════════════════════
+function nextQuestion() {
+  currentQ++;
+  if (currentQ < roundQuestions.length) {
+    renderQuestion();
+  } else {
+    endRound();
+  }
+}
+
+function endRound() {
+  totalCorrect += roundCorrect;
+  totalAsked += roundQuestions.length;
+
+  const pct = roundCorrect / roundQuestions.length;
+  const pctDisplay = Math.round(pct * 100);
+  const passed = pct >= PASS_THRESHOLD;
+
+  // Results screen class
+  const rs = document.getElementById('screen-results');
+  rs.className = 'screen ' + (passed ? 'pass-bg' : 'fail-bg');
+
+  document.getElementById('resultsEmoji').textContent = passed ? '🎉' : '😅';
+  const title = document.getElementById('resultsTitle');
+  title.textContent = passed ? '¡Excelente trabajo!' : '¡Casi lo logras!';
+  title.className = 'results-title ' + (passed ? 'pass' : 'fail');
+
+  document.getElementById('resultsSub').textContent = passed
+    ? `¡Conseguiste ${pctDisplay}%! Puedes avanzar al siguiente nivel.`
+    : `Obtuviste ${pctDisplay}%. Necesitas al menos 70% para avanzar. ¡Tú puedes!`;
+
+  const sb = document.getElementById('scoreBig');
+  sb.textContent = pctDisplay + '%';
+  sb.className = 'score-big ' + (passed ? 'pass' : 'fail');
+
+  document.getElementById('scoreFraction').textContent =
+    `${roundCorrect} de ${roundQuestions.length} correctas`;
+
+  // Animated bar
+  const bar = document.getElementById('thresholdBarInner');
+  bar.className = 'threshold-bar-inner ' + (passed ? 'pass' : 'fail');
+  setTimeout(() => { bar.style.width = Math.min(pctDisplay, 100) + '%'; }, 100);
+
+  // Review list
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  roundAnswers.forEach(a => {
+    const item = document.createElement('div');
+    item.className = 'review-item ' + (a.isCorrect ? 'ok' : 'err');
+    const wordDisplay = a.q.type==='choose' ? a.q.word : a.q.word;
+    item.innerHTML = `
+      <span class="review-icon">${a.isCorrect ? '✅' : '❌'}</span>
+      <div class="review-text">
+        <div class="review-q">${wordDisplay}</div>
+        <div class="review-answer">Tu respuesta: <strong>${a.chosen}</strong></div>
+        ${!a.isCorrect ? `<div class="review-correct">Correcto: ${a.q.correct}</div>` : ''}
+      </div>`;
+    list.appendChild(item);
+  });
+
+  // Buttons
+  const btnA = document.getElementById('btnAdvance');
+  const btnR = document.getElementById('btnRetry');
+  if (passed) {
+    const isLastRound = round >= MAX_ROUNDS;
+    btnA.textContent = isLastRound ? '🏆 ¡Terminar el juego!' : '¡Continuar al siguiente nivel! 🌟';
+    btnA.style.display = 'block';
+    btnR.style.display = 'none';
+    if (passed) launchConfetti();
+  } else {
+    btnA.style.display = 'none';
+    btnR.style.display = 'block';
+  }
+
+  showScreen('results');
+}
+
+// ═══════════════════════════════════════════
+// VICTORY
+// ═══════════════════════════════════════════
+function showVictory() {
+  const finalPct = Math.round((totalCorrect / totalAsked) * 100);
+  document.getElementById('victoryTitle').textContent =
+    '¡' + playerName + ', lo lograste!';
+  document.getElementById('victorySub').textContent =
+    `Completaste todos los niveles de Plurales Irregulares. ¡Eres increíble!`;
+  document.getElementById('victoryScore').textContent = finalPct + '%';
+  const stars = finalPct >= 90 ? '⭐⭐⭐' : finalPct >= 80 ? '⭐⭐' : '⭐';
+  document.getElementById('starsRow').textContent = stars;
+  launchConfetti();
+  showScreen('victory');
+}
+
+// ═══════════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════════
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = ['#ffd93d','#ff6b35','#06d6a0','#ef476f','#118ab2','#9b5de5'];
+  const particles = Array.from({length:120}, () => ({
+    x: Math.random() * canvas.width,
+    y: -10 - Math.random() * 80,
+    w: 8 + Math.random() * 8, h: 4 + Math.random() * 4,
+    r: Math.random() * Math.PI,
+    dr: (Math.random() - 0.5) * 0.15,
+    vy: 2 + Math.random() * 3, vx: (Math.random() - 0.5) * 2,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    alpha: 1
+  }));
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p => {
+      p.y += p.vy; p.x += p.vx; p.r += p.dr;
+      if (frame > 90) p.alpha = Math.max(0, p.alpha - 0.012);
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.translate(p.x + p.w/2, p.y + p.h/2);
+      ctx.rotate(p.r);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    frame++;
+    if (particles.some(p => p.alpha > 0)) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+
+// Allow Enter key on name input
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startGame();
+});
 </script>
 </body>
 </html>
