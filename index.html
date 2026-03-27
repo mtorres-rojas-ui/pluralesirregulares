@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plurales Irregulares — Juego Completo</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --purple:#7C5CBF;--purple-l:#EDE8F9;--purple-d:#3C3489;
+  --teal:#1B9E75;--teal-l:#DCF5EC;--teal-d:#085041;
+  --coral:#E05A2B;--coral-l:#FCEAE3;--coral-d:#712B13;
+  --amber:#D4860F;--amber-l:#FEF3DC;--amber-d:#633806;
+  --red:#E24B4A;--red-l:#FCEBEB;--red-d:#791F1F;
+  --blue-l:#E6F1FB;--blue-d:#0C447C;
+  --bg:#F7F4FF;--card:#fff;--border:#DDD6F5;--text:#1E1640;--muted:#7B70A3;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;user-select:none;-webkit-user-select:none;}
+
+header{background:var(--purple);padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.gtitle{font-family:'Fredoka One',cursive;font-size:1.75rem;color:#fff;}
+.hright{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.hbadge{background:rgba(255,255,255,.2);color:#fff;font-size:.9rem;font-weight:700;padding:5px 14px;border-radius:20px;}
+.hscore{background:var(--amber);color:#fff;font-family:'Fredoka One',cursive;font-size:1rem;padding:5px 14px;border-radius:20px;}
+
+.phase-bar{display:flex;justify-content:center;gap:8px;padding:.65rem 1rem;background:var(--purple-l);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.ppill{font-size:12px;font-weight:700;padding:5px 13px;border-radius:20px;border:2px solid var(--border);background:#fff;color:var(--muted);transition:all .2s;}
+.ppill.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+.ppill.done{background:var(--teal);color:#fff;border-color:var(--teal);}
+
+.main{max-width:780px;margin:0 auto;padding:1.75rem 1rem 3rem;}
+.card{background:var(--card);border:.5px solid var(--border);border-radius:18px;padding:1.25rem 1.5rem;margin-bottom:12px;}
+.clabel{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:1rem;}
+
+/* drag & drop */
+.dnd-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.col-label{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;text-align:center;}
+.drag-card{background:var(--card);border:2.5px solid var(--border);border-radius:14px;padding:.75rem 1.1rem;font-family:'Fredoka One',cursive;font-size:1.35rem;text-align:center;margin-bottom:10px;cursor:grab;transition:transform .15s,box-shadow .15s,border-color .15s,background .15s;position:relative;min-height:58px;display:flex;align-items:center;justify-content:center;}
+.drag-card:hover:not(.dc-locked):not(.dc-dragging){transform:translateY(-2px) scale(1.02);box-shadow:0 6px 20px rgba(124,92,191,.18);border-color:var(--purple);}
+.drag-card.dc-dragging{opacity:.35;cursor:grabbing;}
+.drag-card.dc-locked{background:var(--teal-l);border-color:var(--teal);color:var(--teal-d);cursor:default;}
+.drag-card.dc-locked::after{content:'✓';position:absolute;right:11px;font-size:.95rem;font-family:sans-serif;}
+.drag-card.dc-shake{animation:shake .35s ease;border-color:var(--coral);background:var(--coral-l);color:var(--coral-d);}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.drop-zone{position:relative;border:2.5px dashed var(--border);border-radius:14px;padding:.75rem 1.1rem;min-height:58px;margin-bottom:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:border-color .15s,background .15s;}
+.dz-word{font-family:'Fredoka One',cursive;font-size:1.35rem;color:var(--text);}
+.dz-hint{font-size:.7rem;font-weight:700;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;}
+.drop-zone.dz-over{border-color:var(--purple);background:var(--purple-l);}
+.drop-zone.dz-matched{border-style:solid;border-color:var(--teal);background:var(--teal-l);}
+.drop-zone.dz-matched .dz-word{color:var(--teal-d);}
+.drop-zone.dz-matched .dz-hint{display:none;}
+.drop-zone.dz-matched::after{content:'✓';position:absolute;right:13px;font-size:.95rem;color:var(--teal);font-family:sans-serif;}
+.drop-zone.dz-wrong{animation:flashBack .5s ease forwards;}
+@keyframes flashBack{0%{background:var(--coral-l);border-color:var(--coral)}100%{background:transparent;border-color:var(--border)}}
+
+#drag-ghost{position:fixed;pointer-events:none;background:var(--purple);color:#fff;font-family:'Fredoka One',cursive;font-size:1.15rem;padding:.55rem 1.1rem;border-radius:12px;z-index:9999;transform:translate(-50%,-50%) rotate(-3deg) scale(1.05);display:none;white-space:nowrap;}
+
+/* write */
+.word-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.sing-box{font-family:'Fredoka One',cursive;font-size:1.3rem;min-width:125px;background:var(--purple-l);color:var(--purple-d);border-radius:10px;padding:6px 12px;text-align:center;}
+.p-arrow{font-size:1.2rem;color:var(--muted);}
+.plural-inp{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;padding:7px 12px;border-radius:10px;border:2px solid var(--border);background:#fff;color:var(--text);width:148px;outline:none;transition:border-color .2s,background .2s;}
+.plural-inp:focus{border-color:var(--purple);}
+.plural-inp.correct{border-color:var(--teal);background:var(--teal-l);color:var(--teal-d);}
+.plural-inp.wrong{border-color:var(--red);background:var(--red-l);color:var(--red-d);}
+.hint-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;}
+.h-z{background:var(--coral-l);color:var(--coral-d);}
+.h-cons{background:var(--teal-l);color:var(--teal-d);}
+.h-voc{background:var(--purple-l);color:var(--purple-d);}
+.h-esp{background:var(--amber-l);color:var(--amber-d);}
+.wfb{font-size:12px;font-weight:700;min-width:110px;}
+.wfb.ok{color:var(--teal);}
+.wfb.no{color:var(--red);}
+.z-trick{font-size:.82rem;color:var(--muted);margin:-6px 0 10px 140px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.zt-strike{text-decoration:line-through;color:var(--red);font-weight:700;}
+.zt-res{font-weight:700;color:var(--teal-d);}
+
+/* sentences */
+.sent-block{margin-bottom:1.25rem;}
+.sent-text{font-size:1rem;line-height:1.9;color:var(--text);display:flex;align-items:center;flex-wrap:wrap;gap:5px;}
+.sent-inp{font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:700;padding:4px 10px;border-radius:8px;border:2px solid var(--border);background:#fff;color:var(--text);width:145px;outline:none;transition:border-color .2s,background .2s;}
+.sent-inp:focus{border-color:var(--purple);}
+.sent-inp.correct{border-color:var(--teal);background:var(--teal-l);color:var(--teal-d);}
+.sent-inp.wrong{border-color:var(--red);background:var(--red-l);color:var(--red-d);}
+.sent-key{font-size:12px;color:var(--muted);margin-top:3px;}
+.sfb{font-size:12px;font-weight:700;margin-top:3px;min-height:18px;}
+.sfb.ok{color:var(--teal);}
+.sfb.no{color:var(--red);}
+
+/* ── PHASE 4 integrated ── */
+.p4-section{margin-bottom:1.5rem;}
+.p4-section-title{font-size:13px;font-weight:700;padding:5px 14px;border-radius:20px;display:inline-block;margin-bottom:12px;}
+.p4-drag-title{background:var(--purple-l);color:var(--purple-d);}
+.p4-write-title{background:var(--coral-l);color:var(--coral-d);}
+.p4-sent-title{background:var(--teal-l);color:var(--teal-d);}
+
+.p4-mini-dnd{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:8px;}
+.p4-drag-card{background:var(--card);border:2.5px solid var(--border);border-radius:12px;padding:.65rem 1rem;font-family:'Fredoka One',cursive;font-size:1.2rem;text-align:center;margin-bottom:8px;cursor:grab;transition:transform .15s,box-shadow .15s,border-color .15s,background .15s;position:relative;min-height:52px;display:flex;align-items:center;justify-content:center;}
+.p4-drag-card:hover:not(.dc-locked):not(.dc-dragging){transform:translateY(-2px);box-shadow:0 5px 16px rgba(124,92,191,.15);border-color:var(--purple);}
+.p4-drag-card.dc-dragging{opacity:.35;}
+.p4-drag-card.dc-locked{background:var(--teal-l);border-color:var(--teal);color:var(--teal-d);cursor:default;}
+.p4-drag-card.dc-locked::after{content:'✓';position:absolute;right:10px;font-size:.9rem;font-family:sans-serif;}
+.p4-drag-card.dc-shake{animation:shake .35s ease;}
+.p4-drop-zone{position:relative;border:2.5px dashed var(--border);border-radius:12px;padding:.65rem 1rem;min-height:52px;margin-bottom:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:border-color .15s,background .15s;}
+.p4-drop-zone .dz-word{font-size:1.2rem;}
+.p4-drop-zone.dz-over{border-color:var(--purple);background:var(--purple-l);}
+.p4-drop-zone.dz-matched{border-style:solid;border-color:var(--teal);background:var(--teal-l);}
+.p4-drop-zone.dz-matched .dz-word{color:var(--teal-d);}
+.p4-drop-zone.dz-matched .dz-hint{display:none;}
+.p4-drop-zone.dz-matched::after{content:'✓';position:absolute;right:12px;font-size:.9rem;color:var(--teal);font-family:sans-serif;}
+.p4-drop-zone.dz-wrong{animation:flashBack .5s ease forwards;}
+
+/* challenge badge */
+.challenge-banner{background:linear-gradient(135deg,var(--purple) 0%,#534AB7 100%);border-radius:14px;padding:1.1rem 1.5rem;margin-bottom:1.25rem;text-align:center;}
+.ch-title{font-family:'Fredoka One',cursive;font-size:1.4rem;color:#fff;margin-bottom:4px;}
+.ch-sub{font-size:.9rem;color:rgba(255,255,255,.8);}
+
+/* buttons */
+.btn{display:inline-block;padding:9px 22px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;border-radius:50px;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+.btn:active{transform:scale(.97);}
+.btn-purple{background:var(--purple);color:#fff;box-shadow:0 4px 14px rgba(124,92,191,.3);}
+.btn-purple:hover{box-shadow:0 6px 18px rgba(124,92,191,.4);}
+.btn-teal{background:var(--teal);color:#fff;box-shadow:0 4px 14px rgba(27,158,117,.3);}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.1rem;align-items:center;}
+.snote{font-size:13px;color:var(--muted);}
+
+/* result */
+.result-wrap{text-align:center;padding:2.5rem 1.5rem;}
+.re-emoji{font-size:4rem;margin-bottom:.5rem;}
+.re-title{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--purple);margin-bottom:.4rem;}
+.re-sub{font-size:1rem;color:var(--muted);margin-bottom:.75rem;}
+.re-score{font-family:'Fredoka One',cursive;font-size:1.7rem;color:var(--amber);margin-bottom:1.25rem;}
+.stars-row{display:flex;justify-content:center;gap:6px;margin-bottom:1.25rem;font-size:2rem;}
+
+.cf{position:fixed;width:10px;height:10px;border-radius:2px;pointer-events:none;z-index:9999;animation:fall linear forwards;}
+@keyframes fall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
+
+@media(max-width:560px){
+  .gtitle{font-size:1.25rem;}
+  .dnd-grid,.p4-mini-dnd{grid-template-columns:1fr;}
+  .drag-card,.dz-word,.p4-drag-card,.p4-drop-zone .dz-word{font-size:1.05rem;}
+  .sing-box{font-size:1.05rem;min-width:100px;}
+  .plural-inp,.sent-inp{width:118px;}
+  .card{padding:1rem;}
+  .z-trick{margin-left:0;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="gtitle">Plurales Irregulares</div>
+  <div class="hright">
+    <div class="hbadge" id="phase-label">Parte 1 de 4</div>
+    <div class="hscore">⭐ <span id="score">0</span></div>
+  </div>
+</header>
+
+<div class="phase-bar">
+  <div class="ppill active" id="pill-1">1 — Arrastra</div>
+  <div class="ppill" id="pill-2">2 — Escribe</div>
+  <div class="ppill" id="pill-3">3 — Oraciones</div>
+  <div class="ppill" id="pill-4">4 — Desafío final</div>
+</div>
+
+<div class="main" id="main"></div>
+<div id="drag-ghost"></div>
+
+<script>
+const WORDS=[
+  {s:'rey',p:'reyes',type:'voc',hint:'vocal → +es'},
+  {s:'veloz',p:'veloces',type:'z',hint:'z → ces'},
+  {s:'codorniz',p:'codornices',type:'z',hint:'z → ces'},
+  {s:'luz',p:'luces',type:'z',hint:'z → ces'},
+  {s:'arroz',p:'arroces',type:'z',hint:'z → ces'},
+  {s:'tapiz',p:'tapices',type:'z',hint:'z → ces'},
+  {s:'disfraz',p:'disfraces',type:'z',hint:'z → ces'},
+  {s:'sí',p:'síes',type:'esp',hint:'especial'},
+  {s:'paz',p:'paces',type:'z',hint:'z → ces'},
+  {s:'álbum',p:'álbumes',type:'cons',hint:'consonante → +es'},
+  {s:'ley',p:'leyes',type:'voc',hint:'vocal → +es'},
+  {s:'eficaz',p:'eficaces',type:'z',hint:'z → ces'},
+];
+const SENTENCES=[
+  {before:'El cielo se iluminó con muchas ',word:'luz',after:' de colores.',answer:'luces'},
+  {before:'Los ',word:'rey',after:' gobernaron por muchos años.',answer:'reyes'},
+  {before:'En el lago nadaban muchos ',word:'pez',after:' brillantes.',answer:'peces'},
+  {before:'Los estudiantes usaron sus ',word:'lápiz',after:' para dibujar.',answer:'lápices'},
+  {before:'Durante la fiesta todos llevaron ',word:'disfraz',after:' divertidos.',answer:'disfraces'},
+  {before:'Las ',word:'ley',after:' del país deben respetarse.',answer:'leyes'},
+  {before:'Los vecinos piden más ',word:'paz',after:' en la comunidad.',answer:'paces'},
+  {before:'Mi mamá tiene varios ',word:'álbum',after:' de fotos de la familia.',answer:'álbumes'},
+  {before:'Las ',word:'codorniz',after:' viven en el campo.',answer:'codornices'},
+  {before:'Los doctores son personas muy ',word:'eficaz',after:' en su trabajo.',answer:'eficaces'},
+];
+
+// Phase 4 integrated data — new sentences + mixed write prompts
+const P4_DRAG=[
+  {s:'veloz',p:'veloces',type:'z',hint:'z → ces'},
+  {s:'álbum',p:'álbumes',type:'cons',hint:'consonante → +es'},
+  {s:'paz',p:'paces',type:'z',hint:'z → ces'},
+  {s:'ley',p:'leyes',type:'voc',hint:'vocal → +es'},
+];
+const P4_WRITE=[
+  {s:'codorniz',p:'codornices',type:'z',hint:'z → ces'},
+  {s:'disfraz',p:'disfraces',type:'z',hint:'z → ces'},
+  {s:'rey',p:'reyes',type:'voc',hint:'vocal → +es'},
+  {s:'eficaz',p:'eficaces',type:'z',hint:'z → ces'},
+];
+const P4_SENT=[
+  {before:'Las ',word:'luz',after:' de la ciudad brillaban mucho de noche.',answer:'luces'},
+  {before:'En el mercado vendían ',word:'tapiz',after:' muy coloridos.',answer:'tapices'},
+  {before:'Los músicos grabaron varios ',word:'álbum',after:' este año.',answer:'álbumes'},
+  {before:'El estudiante pidió más ',word:'lápiz',after:' para su clase de arte.',answer:'lápices'},
+];
+
+const COLORS=['#7C5CBF','#1B9E75','#E05A2B','#D4860F','#E24B4A'];
+let score=0,dragId=null,dndRound=0,dndMatched=0;
+let p2done=false,p3done=false,p4done=false;
+let p4DndId=null,p4DndMatched=0;
+
+const DND_ROUNDS=[WORDS.slice(0,6),WORDS.slice(6,12)];
+
+function norm(s){return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function hc(t){return t==='z'?'h-z':t==='cons'?'h-cons':t==='esp'?'h-esp':'h-voc';}
+function setPills(a){
+  [1,2,3,4].forEach(n=>{
+    document.getElementById('pill-'+n).className='ppill'+(n===a?' active':n<a?' done':'');
+  });
+  document.getElementById('phase-label').textContent='Parte '+a+' de 4';
+}
+
+/* ════════════ PHASE 1 ════════════ */
+function buildP1(){setPills(1);dndRound=0;dndMatched=0;renderDnd();}
+function renderDnd(){
+  const pairs=DND_ROUNDS[dndRound];
+  const shuffled=[...pairs].sort(()=>Math.random()-.5);
+  let h=`<div class="card"><div class="clabel">Arrastra cada singular a su plural — grupo ${dndRound+1} de 2</div>
+    <div class="dnd-grid">
+      <div><div class="col-label">Singular — arrastra</div><div id="sc">`;
+  pairs.forEach((w,i)=>h+=`<div class="drag-card" id="dc-${i}" data-id="${i}" data-phase="1">${w.s}</div>`);
+  h+=`</div></div><div><div class="col-label">Plural — suelta aquí</div><div id="zc">`;
+  shuffled.forEach(w=>{
+    const ci=pairs.indexOf(w);
+    h+=`<div class="drop-zone" data-correct="${ci}" data-phase="1"><span class="dz-word">${w.p}</span><span class="dz-hint hint-tag ${hc(w.type)}">${w.hint}</span></div>`;
+  });
+  h+=`</div></div></div></div>`;
+  document.getElementById('main').innerHTML=h;
+  attachDnd('[data-phase="1"]','[data-phase="1"]');
+}
+
+/* ════════════ PHASE 2 ════════════ */
+function goP2(){setPills(2);p2done=false;
+  let h=`<div class="card"><div class="clabel">Escribe el plural de cada palabra</div>`;
+  WORDS.forEach((w,i)=>{
+    const stem=w.type==='z'?w.s.slice(0,-1):'';
+    h+=`<div class="word-row"><div class="sing-box">${w.s}</div><div class="p-arrow">→</div>
+      <input class="plural-inp" id="pi-${i}" type="text" placeholder="plural..." autocomplete="off" spellcheck="false">
+      <span class="hint-tag ${hc(w.type)}">${w.hint}</span><div class="wfb" id="wf-${i}"></div></div>`;
+    if(w.type==='z')h+=`<div class="z-trick">Tacha la z: <strong style="color:var(--coral-d)">${stem}<span class="zt-strike">z</span></strong> → escribe <span class="zt-res">${stem}ces</span></div>`;
+  });
+  h+=`<div class="btn-row"><button class="btn btn-purple" id="ck2">Revisar respuestas</button><span class="snote" id="n2"></span></div></div>`;
+  document.getElementById('main').innerHTML=h;
+  WORDS.forEach((_,i)=>document.getElementById(`pi-${i}`).addEventListener('keydown',e=>{if(e.key==='Enter')ckP2();}));
+  document.getElementById('ck2').onclick=ckP2;
+}
+function ckP2(){
+  if(p2done){goP3();return;}
+  let c=0,f=0;
+  WORDS.forEach((w,i)=>{
+    const inp=document.getElementById(`pi-${i}`),fb=document.getElementById(`wf-${i}`);
+    if(!inp.value.trim()){fb.textContent='';inp.className='plural-inp';return;}
+    f++;
+    if(norm(inp.value)===norm(w.p)){inp.className='plural-inp correct';fb.textContent='✓ correcto';fb.className='wfb ok';c++;}
+    else{inp.className='plural-inp wrong';fb.textContent='✗ es: '+w.p;fb.className='wfb no';}
+  });
+  score+=c*5;document.getElementById('score').textContent=score;
+  document.getElementById('n2').textContent=`${c} de ${f} correctas`;
+  const btn=document.getElementById('ck2');btn.textContent='Continuar a las oraciones →';btn.className='btn btn-teal';
+  p2done=true;
+}
+
+/* ════════════ PHASE 3 ════════════ */
+function goP3(){setPills(3);p3done=false;
+  let h=`<div class="card"><div class="clabel">Completa cada oración con el plural correcto</div>`;
+  SENTENCES.forEach((s,i)=>{
+    h+=`<div class="sent-block"><div class="sent-text">${s.before}<input class="sent-inp" id="si-${i}" type="text" placeholder="${s.word}..." autocomplete="off" spellcheck="false">${s.after}</div>
+      <div class="sent-key">(plural de: <strong>${s.word}</strong>)</div><div class="sfb" id="sf-${i}"></div></div>`;
+  });
+  h+=`<div class="btn-row"><button class="btn btn-purple" id="ck3">Revisar oraciones</button><span class="snote" id="n3"></span></div></div>`;
+  document.getElementById('main').innerHTML=h;
+  SENTENCES.forEach((_,i)=>document.getElementById(`si-${i}`).addEventListener('keydown',e=>{if(e.key==='Enter')ckP3();}));
+  document.getElementById('ck3').onclick=ckP3;
+}
+function ckP3(){
+  if(p3done){goP4();return;}
+  let c=0,f=0;
+  SENTENCES.forEach((s,i)=>{
+    const inp=document.getElementById(`si-${i}`),fb=document.getElementById(`sf-${i}`);
+    if(!inp.value.trim()){fb.textContent='';inp.className='sent-inp';return;}
+    f++;
+    if(norm(inp.value)===norm(s.answer)){inp.className='sent-inp correct';fb.textContent='✓ correcto';fb.className='sfb ok';c++;}
+    else{inp.className='sent-inp wrong';fb.textContent='✗ es: '+s.answer;fb.className='sfb no';}
+  });
+  score+=c*10;document.getElementById('score').textContent=score;
+  document.getElementById('n3').textContent=`${c} de ${f} correctas`;
+  const btn=document.getElementById('ck3');btn.textContent='Continuar al desafío final →';btn.className='btn btn-teal';
+  p3done=true;
+}
+
+/* ════════════ PHASE 4 — INTEGRATED ════════════ */
+function goP4(){
+  setPills(4);p4done=false;p4DndId=null;p4DndMatched=0;
+  const shuffledDrop=[...P4_DRAG].sort(()=>Math.random()-.5);
+
+  let h=`<div class="challenge-banner">
+    <div class="ch-title">Desafío final</div>
+    <div class="ch-sub">Las tres actividades juntas — sin pistas de reglas</div>
+  </div>`;
+
+  // Section A: drag & drop
+  h+=`<div class="card"><div class="p4-section">
+    <span class="p4-section-title p4-drag-title">A — Arrastra el singular a su plural</span>
+    <div class="p4-mini-dnd">
+      <div><div class="col-label">Singular</div><div id="p4-sc">`;
+  P4_DRAG.forEach((w,i)=>h+=`<div class="p4-drag-card drag-card" id="p4dc-${i}" data-id="${i}" data-phase="4">${w.s}</div>`);
+  h+=`</div></div><div><div class="col-label">Plural</div><div id="p4-zc">`;
+  shuffledDrop.forEach(w=>{
+    const ci=P4_DRAG.indexOf(w);
+    h+=`<div class="p4-drop-zone drop-zone" data-correct="${ci}" data-phase="4"><span class="dz-word">${w.p}</span><span class="dz-hint hint-tag ${hc(w.type)}">${w.hint}</span></div>`;
+  });
+  h+=`</div></div></div></div>`;
+
+  // Section B: write
+  h+=`<div class="p4-section" style="margin-top:1rem">
+    <span class="p4-section-title p4-write-title">B — Escribe el plural (sin ayuda)</span>`;
+  P4_WRITE.forEach((w,i)=>{
+    h+=`<div class="word-row"><div class="sing-box">${w.s}</div><div class="p-arrow">→</div>
+      <input class="plural-inp" id="p4pi-${i}" type="text" placeholder="plural..." autocomplete="off" spellcheck="false">
+      <div class="wfb" id="p4wf-${i}"></div></div>`;
+  });
+  h+=`</div>`;
+
+  // Section C: sentences
+  h+=`<div class="p4-section" style="margin-top:1rem">
+    <span class="p4-section-title p4-sent-title">C — Completa las oraciones</span>`;
+  P4_SENT.forEach((s,i)=>{
+    h+=`<div class="sent-block"><div class="sent-text">${s.before}<input class="sent-inp" id="p4si-${i}" type="text" placeholder="${s.word}..." autocomplete="off" spellcheck="false">${s.after}</div>
+      <div class="sent-key">(plural de: <strong>${s.word}</strong>)</div><div class="sfb" id="p4sf-${i}"></div></div>`;
+  });
+  h+=`</div>`;
+
+  h+=`<div class="btn-row"><button class="btn btn-purple" id="ck4">Revisar todo</button><span class="snote" id="n4"></span></div></div>`;
+
+  document.getElementById('main').innerHTML=h;
+
+  // attach drag for p4
+  attachDnd('[data-phase="4"].drag-card, [data-phase="4"].p4-drag-card','[data-phase="4"]');
+
+  P4_WRITE.forEach((_,i)=>document.getElementById(`p4pi-${i}`).addEventListener('keydown',e=>{if(e.key==='Enter')ckP4();}));
+  P4_SENT.forEach((_,i)=>document.getElementById(`p4si-${i}`).addEventListener('keydown',e=>{if(e.key==='Enter')ckP4();}));
+  document.getElementById('ck4').onclick=ckP4;
+}
+
+function ckP4(){
+  if(p4done){showResult();return;}
+  let c=0,f=0;
+
+  // write
+  P4_WRITE.forEach((w,i)=>{
+    const inp=document.getElementById(`p4pi-${i}`),fb=document.getElementById(`p4wf-${i}`);
+    if(!inp.value.trim()){fb.textContent='';inp.className='plural-inp';return;}
+    f++;
+    if(norm(inp.value)===norm(w.p)){inp.className='plural-inp correct';fb.textContent='✓';fb.className='wfb ok';c++;}
+    else{inp.className='plural-inp wrong';fb.textContent='✗ '+w.p;fb.className='wfb no';}
+  });
+
+  // sentences
+  P4_SENT.forEach((s,i)=>{
+    const inp=document.getElementById(`p4si-${i}`),fb=document.getElementById(`p4sf-${i}`);
+    if(!inp.value.trim()){fb.textContent='';inp.className='sent-inp';return;}
+    f++;
+    if(norm(inp.value)===norm(s.answer)){inp.className='sent-inp correct';fb.textContent='✓ correcto';fb.className='sfb ok';c++;}
+    else{inp.className='sent-inp wrong';fb.textContent='✗ es: '+s.answer;fb.className='sfb no';}
+  });
+
+  // drag points already counted live; count locked
+  const locked=document.querySelectorAll('[data-phase="4"].dc-locked').length;
+  const dragPts=locked*15;
+  score+=c*15+dragPts;
+  document.getElementById('score').textContent=score;
+  const total=f+locked;
+  document.getElementById('n4').textContent=`${c+locked} de ${total} correctas`;
+  const btn=document.getElementById('ck4');btn.textContent='Ver resultados finales 🎉';btn.className='btn btn-teal';
+  p4done=true;
+}
+
+/* ════════════ DRAG ENGINE (shared) ════════════ */
+function attachDnd(cardSel,zoneSel){
+  document.querySelectorAll(cardSel).forEach(c=>{
+    c.addEventListener('mousedown',onMD);
+    c.addEventListener('touchstart',onTS,{passive:true});
+  });
+}
+
+const ghost=document.getElementById('drag-ghost');
+function onMD(e){const c=e.currentTarget;if(c.classList.contains('dc-locked'))return;dragId=c.dataset.id;c.classList.add('dc-dragging');ghost.textContent=c.textContent;ghost.style.display='block';mv(e.clientX,e.clientY);document.addEventListener('mousemove',onMM);document.addEventListener('mouseup',onMU);}
+function onMM(e){mv(e.clientX,e.clientY);hl(e.clientX,e.clientY);}
+function onMU(e){ghost.style.display='none';document.removeEventListener('mousemove',onMM);document.removeEventListener('mouseup',onMU);drop(gz(e.clientX,e.clientY));clr();}
+function onTS(e){const c=e.currentTarget;if(c.classList.contains('dc-locked'))return;dragId=c.dataset.id;c.classList.add('dc-dragging');ghost.textContent=c.textContent;ghost.style.display='block';const t=e.touches[0];mv(t.clientX,t.clientY);document.addEventListener('touchmove',onTM,{passive:false});document.addEventListener('touchend',onTE);}
+function onTM(e){e.preventDefault();const t=e.touches[0];mv(t.clientX,t.clientY);hl(t.clientX,t.clientY);}
+function onTE(e){ghost.style.display='none';document.removeEventListener('touchmove',onTM);document.removeEventListener('touchend',onTE);const t=e.changedTouches[0];drop(gz(t.clientX,t.clientY));clr();}
+function mv(x,y){ghost.style.left=x+'px';ghost.style.top=y+'px';}
+function gz(x,y){for(const z of document.querySelectorAll('.drop-zone,.p4-drop-zone')){const r=z.getBoundingClientRect();if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)return z;}return null;}
+function hl(x,y){clr();const z=gz(x,y);if(z&&!z.classList.contains('dz-matched'))z.classList.add('dz-over');}
+function clr(){document.querySelectorAll('.drop-zone,.p4-drop-zone').forEach(z=>z.classList.remove('dz-over'));}
+
+function drop(zone){
+  const card=document.querySelector(`.drag-card[data-id="${dragId}"],.p4-drag-card[data-id="${dragId}"]`);
+  if(!card){dragId=null;return;}
+  card.classList.remove('dc-dragging');
+  if(!zone||zone.classList.contains('dz-matched')){dragId=null;return;}
+  if(parseInt(zone.dataset.correct)===parseInt(dragId)){
+    card.classList.add('dc-locked');zone.classList.add('dz-matched');
+    const ph=zone.dataset.phase;
+    if(ph==='1'){
+      score+=10;document.getElementById('score').textContent=score;
+      dndMatched++;
+      if(dndMatched===DND_ROUNDS[dndRound].length){
+        setTimeout(()=>{if(dndRound===0){dndRound=1;dndMatched=0;renderDnd();}else{goP2();}},600);
+      }
+    }
+    // phase 4 drag is scored in ckP4
+  } else {
+    card.classList.add('dc-shake');zone.classList.add('dz-wrong');
+    setTimeout(()=>{card.classList.remove('dc-shake');zone.classList.remove('dz-wrong');},500);
+  }
+  dragId=null;
+}
+
+/* ════════════ RESULT ════════════ */
+function showResult(){
+  const max=12*10+12*5+10*10+(4+4+4)*15;
+  const pct=Math.round((score/max)*100);
+  const stars=pct>=85?3:pct>=65?2:1;
+  const emoji=pct>=85?'🏆':pct>=65?'⭐':'💪';
+  const msg=pct>=85?'¡Excelente trabajo!':pct>=65?'¡Buen esfuerzo!':'¡Sigue practicando!';
+  const strs=[...Array(3)].map((_,i)=>i<stars?'⭐':'☆').join('');
+  document.getElementById('main').innerHTML=`<div class="card result-wrap">
+    <div class="re-emoji">${emoji}</div>
+    <div class="re-title">${msg}</div>
+    <div class="re-sub">Completaste las 4 partes del juego</div>
+    <div class="stars-row">${strs}</div>
+    <div class="re-score">⭐ ${score} puntos — ${pct}%</div>
+    <button class="btn btn-purple" onclick="restart()">Jugar de nuevo 🔄</button>
+  </div>`;
+  confetti();
+}
+
+function restart(){
+  score=0;document.getElementById('score').textContent=0;
+  dndRound=0;dndMatched=0;p4DndMatched=0;
+  buildP1();
+}
+
+function confetti(){
+  for(let i=0;i<70;i++){
+    const el=document.createElement('div');el.className='cf';
+    el.style.left=Math.random()*100+'vw';el.style.top='-16px';
+    el.style.background=COLORS[Math.floor(Math.random()*COLORS.length)];
+    el.style.borderRadius=Math.random()>.5?'50%':'2px';
+    el.style.animationDuration=(1.5+Math.random()*2)+'s';
+    el.style.animationDelay=(Math.random()*.8)+'s';
+    document.body.appendChild(el);setTimeout(()=>el.remove(),4000);
+  }
+}
+
+buildP1();
+</script>
+</body>
+</html>
